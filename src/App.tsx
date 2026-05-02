@@ -1,22 +1,13 @@
-import { Route, Routes } from "react-router";
+import { Navigate, Route, Routes } from "react-router";
 import { useAuth } from "react-oidc-context";
 
 import { NavBar } from "./components/NavBar";
-import { HomePage } from "./pages/HomePage";
+import { AuthGuard } from "./components/AuthGuard";
+import { AppsPage } from "./pages/AppsPage";
+import { MePage } from "./pages/MePage";
 
 export function App() {
   const auth = useAuth();
-
-  // The OIDC lib drives a few short-lived states (silent renew in flight,
-  // signin redirect in flight). Render a placeholder rather than letting
-  // pages flicker between unauthenticated and authenticated.
-  if (auth.isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-slate-400">Loading…</p>
-      </div>
-    );
-  }
 
   if (auth.error) {
     return (
@@ -37,11 +28,26 @@ export function App() {
       <NavBar />
       <main className="mx-auto max-w-5xl p-6">
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          {/* Callback path is hit only briefly during the OIDC redirect;
-              AuthProvider's onSigninCallback strips params + sends us
-              home, so we just render the home page here too. */}
-          <Route path="/callback" element={<HomePage />} />
+          <Route
+            path="/"
+            element={
+              <AuthGuard>
+                <AppsPage />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="/me"
+            element={
+              <AuthGuard>
+                <MePage />
+              </AuthGuard>
+            }
+          />
+          {/* The OIDC lib's onSigninCallback strips params and replaces
+              history; rendering Navigate keeps the URL clean if a user
+              ever lands here directly. */}
+          <Route path="/callback" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>
