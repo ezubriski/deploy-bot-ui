@@ -1,8 +1,10 @@
 import { Link, NavLink } from "react-router";
-import { useAuth } from "react-oidc-context";
+
+import { useAuthState } from "../auth/useAuthState";
+import { DEV_AUTH } from "../auth/mode";
 
 export function NavBar() {
-  const auth = useAuth();
+  const auth = useAuthState();
 
   return (
     <header className="border-b border-slate-800 bg-slate-900/50">
@@ -19,47 +21,53 @@ export function NavBar() {
               <NavLink
                 to="/"
                 end
-                className={({ isActive }) =>
-                  isActive ? "text-slate-100" : "text-slate-400 hover:text-slate-200"
-                }
+                className={navLinkClass}
               >
                 Apps
+              </NavLink>
+              <NavLink to="/history" className={navLinkClass}>
+                Lookup
               </NavLink>
             </nav>
           )}
         </div>
         <div className="flex items-center gap-3 text-sm">
+          {DEV_AUTH && (
+            <span
+              title="Dev-auth mode (HTTP Basic). Set VITE_DEV_AUTH=false for OIDC."
+              className="rounded bg-amber-900/40 px-2 py-0.5 text-xs font-medium text-amber-300"
+            >
+              dev-auth
+            </span>
+          )}
           {auth.isAuthenticated ? (
             <>
-              <NavLink
-                to="/me"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-slate-100"
-                    : "text-slate-400 hover:text-slate-200"
-                }
-              >
-                {auth.user?.profile.preferred_username ??
-                  auth.user?.profile.email ??
-                  "signed in"}
+              <NavLink to="/me" className={navLinkClass}>
+                {auth.displayName ?? "signed in"}
               </NavLink>
               <button
-                onClick={() => auth.removeUser()}
+                onClick={auth.signOut}
                 className="rounded border border-slate-700 px-3 py-1 text-slate-200 hover:bg-slate-800"
               >
                 Sign out
               </button>
             </>
           ) : (
-            <button
-              onClick={() => auth.signinRedirect()}
-              className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-500"
-            >
-              Sign in
-            </button>
+            !DEV_AUTH && (
+              <button
+                onClick={auth.signIn}
+                className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-500"
+              >
+                Sign in
+              </button>
+            )
           )}
         </div>
       </div>
     </header>
   );
+}
+
+function navLinkClass({ isActive }: { isActive: boolean }) {
+  return isActive ? "text-slate-100" : "text-slate-400 hover:text-slate-200";
 }

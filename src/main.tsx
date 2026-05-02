@@ -5,6 +5,8 @@ import { BrowserRouter } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { oidcConfig } from "./auth/oidcConfig";
+import { DevAuthProvider } from "./auth/devAuth";
+import { DEV_MOCKS } from "./auth/mode";
 import { App } from "./App";
 
 import "./index.css";
@@ -23,17 +25,35 @@ const queryClient = new QueryClient({
   },
 });
 
-const rootEl = document.getElementById("root");
-if (!rootEl) throw new Error("#root not found in index.html");
+async function bootstrap() {
+  // Gate on import.meta.env.DEV in addition to DEV_MOCKS so MSW is
+  // statically dead code in production builds — the chunk gets
+  // generated but never imported, and a hostile prod env var can't
+  // re-enable it.
+  if (import.meta.env.DEV && DEV_MOCKS) {
+    const { worker } = await import("./test/msw/browser");
+    await worker.start({ onUnhandledRequest: "bypass" });
+  }
 
-createRoot(rootEl).render(
-  <StrictMode>
-    <AuthProvider {...oidcConfig}>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </QueryClientProvider>
-    </AuthProvider>
-  </StrictMode>,
-);
+  const rootEl = document.getElementById("root");
+  if (!rootEl) throw new Error("#root not found in index.html");
+
+  // Both auth providers are always mounted so hooks have a stable
+  // context regardless of mode. useAuthState picks the active one based
+  // on VITE_DEV_AUTH; the inactive provider acts as a no-op.
+  createRoot(rootEl).render(
+    <StrictMode>
+      <AuthProvider {...oidcConfig}>
+        <DevAuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </QueryClientProvider>
+        </DevAuthProvider>
+      </AuthProvider>
+    </StrictMode>,
+  );
+}
+
+void bootstrap();

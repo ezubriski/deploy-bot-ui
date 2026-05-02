@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: deploy-bot-ui
+  namespace: deploy-bot
+  labels:
+    app: deploy-bot-ui
+spec:
+  # ClusterIP by default; an Ingress overlay decides how this is exposed.
+  # Cluster-internal Service intentionally — public access goes through
+  # the operator's chosen ingress controller, which can layer mTLS,
+  # IP allowlists, etc. without per-app config here.
+  type: ClusterIP
+  selector:
+    app: deploy-bot-ui
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

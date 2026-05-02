@@ -23,22 +23,26 @@ export class AuthExpiredError extends APIError {
 }
 
 interface FetchOptions extends Omit<RequestInit, "headers"> {
-  token: string;
+  /**
+   * Full Authorization header value (`Bearer <token>` or `Basic <b64>`).
+   * apiFetch is auth-mode-agnostic; the caller picks how to authenticate.
+   */
+  authorization: string;
   signal?: AbortSignal;
 }
 
 // All API calls go through one wrapper so error parsing, content-type
-// handling, and the bearer header live in one place. Path is relative —
+// handling, and the auth header live in one place. Path is relative —
 // the dev server proxies /v1/* to bin/api, and in production nginx does
 // the same path-prefix split in front of the static SPA.
 export async function apiFetch<T>(
   path: string,
-  { token, signal, ...init }: FetchOptions,
+  { authorization, signal, ...init }: FetchOptions,
 ): Promise<T> {
   const res = await fetch(path, {
     ...init,
     signal,
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: authorization },
   });
 
   if (res.status === 401) throw new AuthExpiredError();
