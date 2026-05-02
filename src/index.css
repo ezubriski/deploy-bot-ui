@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Globals kept minimal; component styling lives with components.
+   Tailwind v4 reads its theme from CSS variables — no separate config
+   file needed unless we want to customize the palette. */
+:root {
+  color-scheme: dark;
+}

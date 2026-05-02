@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Local env — VITE_OIDC_ISSUER and friends are environment-specific.
+.env.local
+.env.*.local
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.log
