@@ -2,25 +2,25 @@ import type { AuthProviderProps } from "react-oidc-context";
 import { WebStorageStateStore } from "oidc-client-ts";
 
 import { DEV_AUTH } from "./mode";
+import { oidcIssuer, oidcClientId } from "../runtimeConfig";
 
-// OIDC settings live in env vars (Vite injects VITE_*-prefixed values at
-// build time). For local dev they come from .env.local; for production
-// they're baked into the static bundle by the build job. The audience
-// is always the UI's own client_id — Keycloak puts that in the `aud`
-// claim of issued ID tokens by default, which is exactly what the API
-// verifier checks.
+// OIDC settings come from runtime config (window.__RUNTIME_CONFIG__,
+// populated by /config.js in the container) so one bundle works against
+// any Keycloak/Skycloak realm. In dev they fall through to VITE_* via
+// runtimeConfig.ts so .env.local still drives `npm run dev`. The
+// audience is always the UI's own client_id — Keycloak puts that in
+// the `aud` claim of issued ID tokens by default, which is exactly
+// what the API verifier checks.
 //
 // In dev-auth mode (VITE_DEV_AUTH=true) the OIDC vars are optional —
 // useAuthState short-circuits to the dev provider and the OIDC provider
 // is never asked to redirect anywhere — but we still need a syntactically
 // valid AuthProviderProps so AuthProvider can mount as a passthrough.
 
-const issuer = import.meta.env.VITE_OIDC_ISSUER;
-const clientId = import.meta.env.VITE_OIDC_CLIENT_ID ?? "deploy-bot-ui";
-
-if (!issuer && !DEV_AUTH) {
+if (!oidcIssuer && !DEV_AUTH) {
   throw new Error(
-    "VITE_OIDC_ISSUER must be set at build time (or in .env.local for dev). " +
+    "OIDC issuer must be set at runtime (OIDC_ISSUER env on the container, " +
+      "or VITE_OIDC_ISSUER in .env.local for dev). " +
       "Set VITE_DEV_AUTH=true to skip OIDC and use the API's admin account.",
   );
 }
@@ -28,8 +28,8 @@ if (!issuer && !DEV_AUTH) {
 export const oidcConfig: AuthProviderProps = {
   // Placeholder issuer in dev-auth mode — AuthProvider stays mounted so
   // useAuth() has a context, but signin is never invoked.
-  authority: issuer ?? "https://oidc-disabled.invalid/",
-  client_id: clientId,
+  authority: oidcIssuer ?? "https://oidc-disabled.invalid/",
+  client_id: oidcClientId,
   redirect_uri: `${window.location.origin}/callback`,
   post_logout_redirect_uri: window.location.origin,
   response_type: "code",
