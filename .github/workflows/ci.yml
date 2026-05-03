@@ -13,7 +13,7 @@ concurrency:
 jobs:
   build-and-test:
     name: lint • typecheck • unit • build
-    runs-on: ubuntu-latest
+    runs-on: homelab
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +40,7 @@ jobs:
 
   e2e:
     name: playwright e2e
-    runs-on: ubuntu-latest
+    runs-on: homelab
     needs: build-and-test
     steps:
       - uses: actions/checkout@v4
@@ -66,7 +66,7 @@ jobs:
 
   container:
     name: container build${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && ' & push' || '' }}
-    runs-on: ubuntu-latest
+    runs-on: homelab
     needs: [build-and-test, e2e]
     permissions:
       contents: read
