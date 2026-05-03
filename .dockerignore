@@ -19,5 +19,3 @@ coverage
 .DS_Store
 *.log
 
-# Already copied via dedicated layers
-deploy/kustomize

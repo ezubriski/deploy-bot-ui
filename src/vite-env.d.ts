@@ -1,11 +1,18 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_OIDC_ISSUER: string;
+  readonly VITE_OIDC_ISSUER?: string;
   readonly VITE_OIDC_CLIENT_ID?: string;
   readonly VITE_API_PROXY?: string;
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv;
+}
+
+interface Window {
+  __RUNTIME_CONFIG__?: {
+    oidcIssuer?: string;
+    oidcClientId?: string;
+  };
 }

@@ -38,6 +38,13 @@ spec:
         - name: nginx
           image: ghcr.io/ezubriski/deploy-bot-ui:latest
           imagePullPolicy: IfNotPresent
+          # Runtime SPA config — entrypoint renders /tmp/config.js from
+          # these on container start. Override per-cluster from an overlay.
+          env:
+            - name: OIDC_ISSUER
+              value: ""
+            - name: OIDC_CLIENT_ID
+              value: "deploy-bot-ui"
           ports:
             - name: http
               containerPort: 8080
