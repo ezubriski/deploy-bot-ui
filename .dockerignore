@@ -1,0 +1,23 @@
+node_modules
+dist
+.vite
+*.tsbuildinfo
+
+# Local env — never bake .env.local into an image
+.env.local
+.env.*.local
+
+# Dev/test artifacts
+e2e
+playwright-report
+test-results
+coverage
+.git
+.github
+.vscode
+.idea
+.DS_Store
+*.log
+
+# Already copied via dedicated layers
+deploy/kustomize

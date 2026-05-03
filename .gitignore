@@ -7,6 +7,12 @@ dist/
 .env.local
 .env.*.local
 
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+.playwright-cache/
+
 # Editor / OS
 .vscode/
 .idea/

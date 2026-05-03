@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Base for the deploy-bot-ui SPA. Assumes the deploy-bot namespace
+# already exists (it's created by the parent deploy-bot kustomize). To
+# install standalone, add a namespace.yaml resource and bump the
+# `namespace` field in your overlay.
+namespace: deploy-bot
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+configMapGenerator:
+  - name: deploy-bot-ui-nginx
+    files:
+      - nginx.conf
+
+images:
+  - name: ghcr.io/ezubriski/deploy-bot-ui
+    newTag: latest
