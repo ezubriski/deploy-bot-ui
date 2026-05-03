@@ -71,10 +71,20 @@ export function App() {
               </AuthGuard>
             }
           />
-          {/* The OIDC lib's onSigninCallback strips params and replaces
-              history; rendering Navigate keeps the URL clean if a user
-              ever lands here directly. */}
-          <Route path="/callback" element={<Navigate to="/" replace />} />
+          {/* AuthProvider parses ?code=&state= in a useEffect on mount.
+              A render-phase Navigate would strip the params before the
+              effect runs, so we wait for auth.isLoading to flip false
+              before sending the user home. */}
+          <Route
+            path="/callback"
+            element={
+              auth.isLoading ? (
+                <p className="pt-6 text-slate-400">Signing in…</p>
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
         </Routes>
       </main>
     </div>
